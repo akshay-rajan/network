@@ -1,0 +1,66 @@
+{% extends "network/layout.html" %}
+{% load static %}
+
+{% block script %}
+    <script src="{% static 'network/script.js' %}"></script>
+{% endblock %}
+
+{% block body %}
+    {% if user.is_authenticated %}
+        <h1 class="display-4">Posts from people you follow</h1>
+        <div>
+            {% for post in posts %}
+            <div>
+                <section class="card">
+                    <div class="post card">
+                        <div hidden class="post-id">{{ post.id }}</div>
+                        <div class="card-header container">
+                            <div class="text-capitalize h5 mb-0">
+                                <img class="thumbnail pull-left media-object" src="../static/network/dp.jpg" width="40px">
+                                <a href="/{{ post.creator }}" style="margin: 15px;">{{ post.creator }}</a>
+                            </div>
+                            <div class="timestamp">{{ post.timestamp }}</div>
+                        </div>
+                        <div class="post-content card-body my-2">{{ post.text }}</div>
+                        <div class="like">
+                            <button class="like-button btn" style="border: none;">
+                                {% if post in liked_posts %}
+                                <img src="{% static 'network/like.png' %}" alt="like" width="20px" height="20px" style="display:none;" class="like-icon">
+                                <img src="{% static 'network/liked.png' %}" alt="liked" width="20px" height="20px" class="unlike-icon">
+                                {% else %}
+                                <img src="{% static 'network/like.png' %}" alt="like" width="20px" height="20px" class="like-icon">
+                                <img src="{% static 'network/liked.png' %}" alt="liked" width="20px" height="20px" style="display:none;" class="unlike-icon">
+                                {% endif %}
+                            </button>
+                            <div class="like-count" style="display: grid; place-items: center;">{{ post.liked_on.count }}</div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            {% empty %}
+            <div>No posts.</div>
+            {% endfor %}
+        </div>
+        <div>
+            <nav>
+                <ul class="pagination">
+                    {% if posts.has_previous %}
+                        <li class="page-item"><a class="page-link" href="?page=1">First</a></li>
+                        <li class="page-item"><a class="page-link" href="?page={{ posts.previous_page_number }}">Previous</a></li>
+                    {% endif %}
+                    <li class="page-item active" style="width: 100%; display: grid; place-items: center;">
+                            Page {{ posts.number }} of {{ posts.paginator.num_pages }}.
+                    </li>
+                    {% if posts.has_next %}
+                        <li class="page-item"><a class="page-link" href="?page={{ posts.next_page_number }}">Next</a></li>
+                        <li class="page-item"><a class="page-link" href="?page={{ posts.paginator.num_pages }}">Last</a></li>
+                    {% endif %}
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    {% else %}
+        <h2 class="display-3">You are not logged in!</h2>
+        <h3 class="display-4"><a href="{% url 'login' %}">Log In</a> or <a href="{% url 'register' %}">Register.</a></h3>
+    {% endif %}
+{% endblock %}

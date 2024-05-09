@@ -1,0 +1,106 @@
+{% extends "network/layout.html" %}
+
+{% load static %}
+{% block script %}
+    <script src="{% static 'network/script.js' %}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            let followBt = document.getElementById('follow');
+            let unfollowBt = document.getElementById('unfollow');
+
+            if (followBt && unfollowBt) {
+                followBt.addEventListener('click', () => {
+                    followBt.style.display = 'none';
+                    unfollowBt.style.display = 'block';
+                });
+                unfollowBt.addEventListener('click', () => {
+                    unfollowBt.style.display = 'none';
+                    followBt.style.display = 'block';
+                });
+            }
+
+        });
+    </script>
+{% endblock %}
+{% block body %}
+    {% if user.is_authenticated %}
+
+    <div class="container">
+        <div class="row profile">
+            <div class="col-md-3">
+                <div class="profile-sidebar">
+                    <div class="profile-usertitle">
+                        <div class="profile-userpic">
+                            <img src="{% static '/network/dp.jpg' %}" class="img-responsive" alt="">
+                        </div>
+                        <div class="profile-usertitle-name">
+                            <h2>{{ this_user.username }}</h2>
+                        </div>
+                        <div class="profile-usertitle-follower btn-group container" style="border-color: #007aff;" role="group">
+                            <div class="btn">Followers {{ followers }}</div>
+                            <div class="btn">Following {{ following }}</div>
+                        </div>
+                    </div>
+                    <div class="profile-userbuttons">
+                        {% if user != this_user %}
+                            <div class="follow-unfollow">
+                                <form action="{% url 'profile' this_user.username %}" method="post">
+                                    {% csrf_token %}
+                                    {% if not follow_status %}
+                                        <input type="submit" value="Follow" id="follow" class="btn btn-success btn-sm">
+                                        <input type="submit" value="Unfollow" id="unfollow" hidden>
+                                    {% else %}
+                                        <input type="submit" value="Follow" id="follow" hidden>
+                                        <input type="submit" value="Unfollow" id="unfollow" class="btn btn-danger btn-sm">
+                                    {% endif %}
+                                </form>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div class="profile-content">
+                    {% for post in posts %}
+                    <div>
+                        <section class="card">
+                            <div class="post card">
+                                <div hidden class="post-id">{{ post.id }}</div>
+                                <div class="card-header container">
+                                    <div class="text-capitalize h5 mb-0">
+                                        <img class="thumbnail pull-left media-object" src="../static/network/dp.jpg" width="40px">
+                                        <a href="/{{ post.creator }}" style="margin: 15px;">{{ post.creator }}</a>
+                                    </div>
+                                    <div class="timestamp">{{ post.timestamp }}</div>
+                                </div>
+                                <div class="post-content card-body my-2">{{ post.text }}</div>
+                                <div class="like">
+                                    <button class="like-button btn" style="border: none;">
+                                        {% if post in liked_posts %}
+                                        <img src="{% static 'network/like.png' %}" alt="like" width="20px" height="20px" style="display:none;" class="like-icon">
+                                        <img src="{% static 'network/liked.png' %}" alt="liked" width="20px" height="20px" class="unlike-icon">
+                                        {% else %}
+                                        <img src="{% static 'network/like.png' %}" alt="like" width="20px" height="20px" class="like-icon">
+                                        <img src="{% static 'network/liked.png' %}" alt="liked" width="20px" height="20px" style="display:none;" class="unlike-icon">
+                                        {% endif %}
+                                    </button>
+                                    <div class="like-count" style="display: grid; place-items: center;">{{ post.liked_on.count }}</div>
+                                    {% if post.creator == user %}
+                                        <input type="submit" value="Edit" class="edit btn btn-light">
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                    {% empty %}
+                        <div>No posts so far!</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+        <h2>You are not logged in!</h2>
+    {% endif %}
+{% endblock %}
